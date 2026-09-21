@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fallkit — combine your sources</title>
+<meta name="description" content="Drop in exports from your different tools — a CRM dump, an accounting export, an HR list — and fallkit maps each to its owned organ, assembles the suggested loadout by seat, and flags the sources that map to nothing yet. One company, every source, in your browser.">
+<meta property="og:title" content="fallkit — combine your sources">
+<meta property="og:description" content="Several real exports → one company picture, a suggested loadout, and the honest gaps. Local only.">
+<link rel="canonical" href="https://sjgant80-hub.github.io/fallkit/multi.html">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0b0a0f;--panel:#141218;--panel2:#191620;--line:#2b251f;--ink:#e2d9c8;--dim:#8f8778;--gold:#d4a017;--gold2:#ffb648;--ok:#46c586;--none:#8f8778;--mono:'DM Mono',ui-monospace,Menlo,monospace}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:0 20px 80px}
+  a{color:var(--gold)} .mono{font-family:var(--mono)}
+  .net{position:sticky;top:0;z-index:20;background:rgba(11,10,15,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin:0 -20px;padding:8px 20px;font-size:.8rem;color:var(--dim);text-align:center}
+  .net b{color:var(--ok);font-family:var(--mono)} .net.warn b{color:#ff6b6b}
+  header{padding:48px 0 14px}
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+  .eyebrow a{color:var(--dim);text-decoration:none} .eyebrow a:hover{color:var(--gold)}
+  h1{font:700 clamp(2rem,5vw,2.9rem)/1.08 'Playfair Display',Georgia,serif;margin:10px 0 10px}
+  .lede{color:var(--dim);max-width:680px} .lede b{color:var(--ink)}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+  @media(max-width:600px){.grid{grid-template-columns:1fr}}
+  .src label{display:block;font-size:.78rem;color:var(--gold);font-family:var(--mono);margin-bottom:4px}
+  textarea{width:100%;background:#0d0c12;border:1px solid var(--line);border-radius:9px;color:var(--ink);font-family:var(--mono);font-size:.76rem;padding:10px 12px;resize:vertical;min-height:78px}
+  .row{margin-top:14px}
+  .btn{font:600 .92rem Inter,sans-serif;background:linear-gradient(96deg,var(--gold),var(--gold2));color:#161006;border:0;border-radius:10px;padding:11px 20px;cursor:pointer}
+  .out{margin-top:24px;display:none} .out.show{display:block}
+  .stat{font-family:var(--mono);font-size:.86rem;color:var(--dim);margin-bottom:10px} .stat b{color:var(--gold)}
+  .srcRow{display:flex;justify-content:space-between;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:9px 13px;margin-bottom:6px;font-size:.86rem}
+  .srcRow .r{font-family:var(--mono);font-size:.78rem;color:var(--dim)}
+  .srcRow .r a{color:var(--gold);text-decoration:none}
+  .tag{font-family:var(--mono);font-size:.66rem;padding:2px 7px;border-radius:5px;background:#10261c;color:var(--ok)}
+  .tag.gap{background:#17151b;color:var(--none)}
+  h2.sec{font:600 1rem 'Playfair Display',serif;color:var(--gold);margin:20px 0 6px}
+  .seats{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+  .seat{background:var(--panel);border:1px solid var(--line);border-radius:9px;padding:9px 12px;font-size:.84rem}
+  .seat h3{margin:0 0 4px;font-size:.72rem;color:var(--dim);text-transform:uppercase;letter-spacing:.05em}
+  .seat .o{font-family:var(--mono);font-size:.78rem;color:var(--ok)}
+  .seat.empty .o{color:var(--none);font-style:italic}
+  .gaps{margin-top:12px;background:linear-gradient(120deg,rgba(212,160,23,.08),transparent);border:1px solid var(--line);border-radius:10px;padding:12px 16px;font-size:.9rem;color:var(--dim)}
+  .gaps b{color:var(--gold)}
+  footer{margin-top:40px;border-top:1px solid var(--line);padding-top:22px;color:var(--dim);font-size:.85rem}
+  .cta{display:inline-block;margin:4px 8px 4px 0;padding:11px 18px;border-radius:10px;text-decoration:none}
+  .cta.solid{background:linear-gradient(96deg,var(--gold),var(--gold2));color:#161006;font-weight:600}
+  .cta.ghost{border:1px solid var(--line);color:var(--ink)}
+  .badge{font-family:var(--mono);font-size:.72rem;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="net" id="net">Runs in your browser · external requests: <b id="netCount">0</b> · your files never leave this page</div>
+  <header>
+    <div class="eyebrow"><a href="./index.html">← fallkit</a> · combine your sources · slice five</div>
+    <h1>One company, every source.</h1>
+    <p class="lede">Paste the exports from your different tools — a CRM dump, an accounting export, an HR list. fallkit maps <b>each</b> to its owned organ, assembles the <b>suggested loadout</b> by seat, and flags the sources that map to <b>nothing yet</b> — which become build-queue signals. Reads only the shapes; nothing leaves your browser.</p>
+  </header>
+
+  <div class="grid" id="grid"></div>
+  <div class="row"><button class="btn" id="combineBtn">Combine all sources →</button></div>
+
+  <div class="out" id="out">
+    <div class="stat" id="stat"></div>
+    <div id="srcRows"></div>
+    <h2 class="sec">Suggested loadout</h2>
+    <div class="seats" id="seats"></div>
+    <div class="gaps" id="gaps"></div>
+  </div>
+
+  <footer>
+    <a class="cta solid" href="./loadout.html">Take it to the loadout →</a>
+    <a class="cta ghost" href="./queue.html">Gaps → the build queue →</a>
+    <a class="cta ghost" href="https://www.ai-nativesolutions.com">Talk to us about a build →</a>
+    <p style="margin-top:16px">The mapping and combination are a mutation-gated kernel this page imports (reusing slice-one's field-mapping and slice-two's seats); the files are parsed entirely in your browser. <span class="badge">source: <a href="https://github.com/sjgant80-hub/fallkit">github.com/sjgant80-hub/fallkit</a> · MIT</span></p>
+    <p class="badge">Powered by the Konomi architecture, created by Thomas Frumkin.</p>
+  </footer>
+</div>
+
+<script type="module">
+import { parseColumns } from './fieldmap.mjs?v=1';
+import { combineSources } from './multi.mjs?v=1';
+import { SEATS } from './loadout.mjs?v=1';
+
+let external = 0;
+const bump = () => { external++; document.getElementById('netCount').textContent = external; document.getElementById('net').classList.add('warn'); };
+const _f = window.fetch; window.fetch = function(...a){ bump(); return _f.apply(this,a); };
+
+const esc = (s)=> String(s).replace(/[&<>]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;' }[c]));
+
+const EXAMPLES = [
+  { name: 'hubspot-contacts.csv', text: 'Full Name,Email Address,Company Name,Deal Stage,Owner\nAda,ada@x.co,Analytical,Qualified,Byron' },
+  { name: 'xero-transactions.csv', text: 'Date,Amount,Description,Category,Reference\n2026-09-01,1200,Container hire,Ops,INV-1' },
+  { name: 'bamboohr-people.csv', text: 'Name,Role,Email,Start Date,Manager\nGrace,Ops Lead,grace@x.co,2024-01-10,Ada' },
+  { name: 'calendly-bookings.csv', text: 'slot,attendee,zoomlink\n2026-09-10 14:00,ada@x.co,https://…' },
+];
+
+document.getElementById('grid').innerHTML = EXAMPLES.map((e,i)=>
+  `<div class="src"><label>${esc(e.name)}</label><textarea data-name="${esc(e.name)}">${esc(e.text)}</textarea></div>`
+).join('');
+
+function combine(){
+  const sources = [];
+  document.querySelectorAll('#grid textarea').forEach(t=>{
+    const text = t.value.trim();
+    if(!text) return;
+    const p = parseColumns(text);
+    if(p.ok) sources.push({ name: t.dataset.name, columns: p.columns, recordCount: p.recordCount });
+  });
+  const c = combineSources(sources);
+  if(!c.ok) return;
+  document.getElementById('stat').innerHTML = `<b>${c.sourceCount}</b> sources · <b>${c.totalRecords}</b> records · <b>${c.organCount}</b> owned organs matched · <b>${c.gaps.length}</b> gaps`;
+  document.getElementById('srcRows').innerHTML = c.sources.map(s=>
+    `<div class="srcRow"><span>${esc(s.name)} <span class="r">(${s.columns} cols · ${s.recordCount} records)</span></span>`+
+    (s.matched
+      ? `<span class="r">→ <a href="https://sjgant80-hub.github.io/${esc(s.repo)}/" target="_blank" rel="noopener">${esc(s.repo)}</a> · ${esc(s.seat)} · ${s.coverage.mapped}/${s.coverage.total} <span class="tag">MATCHED</span></span>`
+      : `<span class="tag gap">NO EQUIVALENT YET</span>`)+`</div>`
+  ).join('');
+  document.getElementById('seats').innerHTML = SEATS.map(seat=>{
+    const organs = c.loadout[seat] || [];
+    return `<div class="seat${organs.length?'':' empty'}"><h3>${esc(seat)}</h3><div class="o">${organs.length?organs.map(esc).join(', '):'—'}</div></div>`;
+  }).join('');
+  document.getElementById('gaps').innerHTML = c.gaps.length
+    ? `<b>${c.gaps.length} source${c.gaps.length>1?'s':''} ${c.gaps.length>1?'map':'maps'} to nothing yet:</b> ${c.gaps.map(esc).join(', ')}. These become signals in the build queue — the honest roadmap, not a hole in the pitch.`
+    : '<span style="color:var(--ok)">Every source maps to an owned organ.</span>';
+  document.getElementById('out').classList.add('show');
+}
+document.getElementById('combineBtn').addEventListener('click', combine);
+combine();
+</script>
+</body>
+</html>
