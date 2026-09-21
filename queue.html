@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fallkit — the build queue</title>
+<meta name="description" content="Every gap a company hits — a tool with no owned equivalent — is a signal. Aggregated across companies, the gaps rank themselves by demand, and that's the honest priority for what gets built next. The roadmap writes itself.">
+<meta property="og:title" content="fallkit — the build queue">
+<meta property="og:description" content="Gaps become ranked demand. The build queue writes itself — no gap is a failure, it's the roadmap.">
+<link rel="canonical" href="https://sjgant80-hub.github.io/fallkit/queue.html">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0b0a0f;--panel:#141218;--panel2:#191620;--line:#2b251f;--ink:#e2d9c8;--dim:#8f8778;--gold:#d4a017;--gold2:#ffb648;--bar:#d4a017;--mono:'DM Mono',ui-monospace,Menlo,monospace}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:820px;margin:0 auto;padding:0 20px 80px}
+  a{color:var(--gold)} .mono{font-family:var(--mono)}
+  header{padding:52px 0 16px}
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+  .eyebrow a{color:var(--dim);text-decoration:none} .eyebrow a:hover{color:var(--gold)}
+  h1{font:700 clamp(2rem,5vw,2.9rem)/1.08 'Playfair Display',Georgia,serif;margin:10px 0 10px}
+  .lede{color:var(--dim);max-width:680px} .lede b{color:var(--ink)}
+  .stat{font-family:var(--mono);font-size:.86rem;color:var(--dim);margin:18px 0 6px}
+  .stat b{color:var(--gold)}
+  .q{margin-top:8px;display:flex;flex-direction:column;gap:8px}
+  .row{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px 14px}
+  .row.top{border-color:var(--gold);background:var(--panel2)}
+  .rank{font-family:var(--mono);color:var(--gold);font-weight:600;text-align:center}
+  .g .nm{font-weight:600} .g .meta{font-size:.76rem;color:var(--dim);font-family:var(--mono)}
+  .demand{text-align:right;min-width:120px}
+  .demand .n{font-family:var(--mono);color:var(--ink);font-size:.86rem}
+  .demand .bar{height:6px;border-radius:4px;background:#0d0c12;border:1px solid var(--line);overflow:hidden;margin-top:4px}
+  .demand .bar i{display:block;height:100%;background:var(--bar)}
+  .add{margin-top:24px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .add h2{font:600 1rem 'Playfair Display',serif;color:var(--gold);margin:0 0 8px}
+  .add .ctl{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  input,select{background:#0d0c12;border:1px solid var(--line);border-radius:8px;color:var(--ink);font:inherit;font-size:.9rem;padding:8px 12px}
+  .btn{font:600 .9rem Inter,sans-serif;background:linear-gradient(96deg,var(--gold),var(--gold2));color:#161006;border:0;border-radius:9px;padding:9px 16px;cursor:pointer}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);font-weight:500}
+  .seam{margin-top:16px;font-size:.9rem;color:var(--dim);background:linear-gradient(120deg,rgba(212,160,23,.08),transparent);border:1px solid var(--line);border-radius:10px;padding:12px 16px}
+  .seam b{color:var(--gold)}
+  footer{margin-top:40px;border-top:1px solid var(--line);padding-top:22px;color:var(--dim);font-size:.85rem}
+  .cta{display:inline-block;margin:4px 8px 4px 0;padding:11px 18px;border-radius:10px;text-decoration:none}
+  .cta.solid{background:linear-gradient(96deg,var(--gold),var(--gold2));color:#161006;font-weight:600}
+  .cta.ghost{border:1px solid var(--line);color:var(--ink)}
+  .badge{font-family:var(--mono);font-size:.72rem;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow"><a href="./index.html">← fallkit</a> · the build queue · slice three</div>
+    <h1>The roadmap writes itself.</h1>
+    <p class="lede">Every gap a company hits — a tool with <b>no owned equivalent</b> — is a signal. Aggregate those signals across companies and they <b>rank themselves by demand</b>. The ranking is nothing but a count, so it can't be gamed: the more companies need the same thing, the higher it sits. A gap isn't a hole in the pitch — it's the <b>honest priority</b> for what gets built (or minted via seam) next.</p>
+  </header>
+
+  <div class="stat" id="stat"></div>
+  <div class="q" id="q"></div>
+
+  <div class="add">
+    <h2>Add a company's gap</h2>
+    <p class="badge">See the flywheel turn: log a gap and watch it climb. Saved in your browser only.</p>
+    <div class="ctl">
+      <input id="gap" placeholder="e.g. Voice agent" spellcheck="false">
+      <select id="seat"></select>
+      <button class="btn" id="addBtn">Log this gap →</button>
+      <button class="btn ghost" id="resetBtn">Reset to seed</button>
+    </div>
+  </div>
+
+  <div class="seam" id="seam"></div>
+
+  <footer>
+    <a class="cta solid" href="https://www.ai-nativesolutions.com">Talk to us about a build →</a>
+    <a class="cta ghost" href="./loadout.html">← Kit out your company</a>
+    <p style="margin-top:16px">The ranking is a count, computed by a mutation-gated kernel in your browser — no AI judgement, no fabrication. Gaps here feed the estate's real build mechanism (seam mints what's demanded). <span class="badge">source: <a href="https://github.com/sjgant80-hub/fallkit">github.com/sjgant80-hub/fallkit</a> · MIT</span></p>
+    <p class="badge">Powered by the Konomi architecture, created by Thomas Frumkin.</p>
+  </footer>
+</div>
+
+<script type="module">
+import { recordGap, mergeSignals, rankQueue, queueStats, GAP_KINDS } from './queue.mjs?v=1';
+import { SEATS } from './loadout.mjs?v=1';
+
+// honest seed: the real remaining gaps across a few example companies (the estate already has a
+// scheduler=fallslot and e-sign=fallsignature, so those are NOT gaps; voice/wiki/design genuinely are)
+const SEED = [
+  { gap: 'Voice agent', seat: 'Sales & CRM', kind: 'no-equivalent' },
+  { gap: 'Voice agent', seat: 'Sales & CRM', kind: 'no-equivalent' },
+  { gap: 'Voice agent', seat: 'Sales & CRM', kind: 'no-equivalent' },
+  { gap: 'Docs / wiki', seat: 'Work', kind: 'no-equivalent' },
+  { gap: 'Docs / wiki', seat: 'Work', kind: 'no-equivalent' },
+  { gap: 'Design tool', seat: 'Office', kind: 'no-equivalent' },
+];
+const KEY = 'fallkit-build-queue-v1';
+
+let queue = load();
+function load(){
+  try { const raw = localStorage.getItem(KEY); if(raw){ const q = JSON.parse(raw); if(Array.isArray(q)) return q; } } catch {}
+  return mergeSignals([], SEED).queue;
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(queue)); } catch {} }
+
+const esc = (s)=> String(s).replace(/[&<>]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;' }[c]));
+
+// seat dropdown
+document.getElementById('seat').innerHTML = ['(any seat)', ...SEATS].map(s=>`<option>${esc(s)}</option>`).join('');
+
+function render(){
+  const r = rankQueue(queue);
+  const s = queueStats(queue);
+  const max = r.ranked.length ? r.ranked[0].demand : 1;
+  document.getElementById('stat').innerHTML = `<b>${s.gaps}</b> distinct gaps · <b>${s.totalDemand}</b> total signals across companies · top: <b>${s.top?esc(s.top.gap):'—'}</b>`;
+  document.getElementById('q').innerHTML = r.ranked.map(e => {
+    const pct = Math.max(6, Math.round(e.demand/max*100));
+    return `<div class="row${e.rank===1?' top':''}"><div class="rank">${e.rank}</div>
+      <div class="g"><div class="nm">${esc(e.gap)}</div><div class="meta">${esc(e.seat||'any seat')} · ${esc(e.kind)}</div></div>
+      <div class="demand"><div class="n">${e.demand} ${e.demand===1?'company':'companies'}</div><div class="bar"><i style="width:${pct}%"></i></div></div></div>`;
+  }).join('');
+  const top = s.top;
+  document.getElementById('seam').innerHTML = top
+    ? `<b>${top.demand} ${top.demand===1?'company needs':'companies need'} "${esc(top.gap)}"</b> — that's what seam mints next. Each new company that hits this gap pushes it up; nothing here is a guess, it's the count.`
+    : 'Log a gap to start the queue.';
+}
+
+document.getElementById('addBtn').addEventListener('click', ()=>{
+  const gap = document.getElementById('gap').value;
+  const seatSel = document.getElementById('seat').value;
+  const seat = seatSel === '(any seat)' ? '' : seatSel;
+  const r = recordGap(queue, { gap, seat, kind: 'no-equivalent' });
+  if(r.ok){ queue = r.queue; save(); document.getElementById('gap').value=''; render(); }
+});
+document.getElementById('gap').addEventListener('keydown', (e)=>{ if(e.key==='Enter') document.getElementById('addBtn').click(); });
+document.getElementById('resetBtn').addEventListener('click', ()=>{ queue = mergeSignals([], SEED).queue; save(); render(); });
+
+render();
+</script>
+</body>
+</html>
