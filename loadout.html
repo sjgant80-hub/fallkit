@@ -56,6 +56,17 @@
     padding:10px 18px;border-radius:10px;font-size:.86rem;opacity:0;transition:.2s;pointer-events:none;max-width:90vw;text-align:center}
   .toast.show{opacity:1}
   .grp{font-family:var(--mono);font-size:.72rem;color:var(--dim);margin:16px 0 2px;text-transform:uppercase;letter-spacing:.06em}
+  .seal{margin-top:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .seal .ctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .seal input{background:#0d0c12;border:1px solid var(--line);border-radius:8px;color:var(--ink);font:inherit;font-size:.9rem;padding:8px 12px}
+  .btn{font:600 .9rem Inter,sans-serif;background:linear-gradient(96deg,var(--gold),var(--gold2));color:#161006;border:0;border-radius:9px;padding:9px 16px;cursor:pointer}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);font-weight:500}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .receipt{margin-top:14px;font-family:var(--mono);font-size:.78rem;color:var(--dim);background:#0d0c12;border:1px solid var(--line);border-radius:10px;padding:14px 16px;white-space:pre-wrap;word-break:break-all;display:none}
+  .receipt.show{display:block}
+  .receipt .k{color:var(--gold)} .receipt .v{color:var(--ink)} .receipt .h{color:var(--works)}
+  .verdict{display:inline-block;font-weight:700;font-family:var(--mono);font-size:.8rem;padding:4px 12px;border-radius:7px;margin:4px 0}
+  .verdict.ok{background:var(--proven-bg);color:var(--proven)} .verdict.no{background:#2a1416;color:var(--red)}
   footer{margin-top:40px;border-top:1px solid var(--line);padding-top:22px;color:var(--dim);font-size:.85rem}
   .cta{display:inline-block;margin:4px 8px 4px 0;padding:11px 18px;border-radius:10px;text-decoration:none}
   .cta.solid{background:linear-gradient(96deg,var(--gold),var(--gold2));color:#161006;font-weight:600}
@@ -79,6 +90,18 @@
   <p class="badge" id="armouryNote"></p>
   <div id="armoury"></div>
 
+  <h2 class="sec">Seal it as a blueprint</h2>
+  <p class="lede">Turn the loadout into a <b>signed company blueprint</b> — a hash of exactly which proven organs fill which seats. Anyone can re-verify it, and it <b>can say FAILS</b>: alter one field, or try to smuggle in an ungated organ, and verification refuses it — even if the hash is recomputed. Auditor- and EU-AI-Act-ready, produced in your browser.</p>
+  <div class="seal">
+    <div class="ctl">
+      <label class="badge">company <input id="company" value="Meridian Logistics" spellcheck="false"></label>
+      <button class="btn" id="sealBtn">Seal this company →</button>
+      <button class="btn ghost" id="dlBtn" disabled>Download receipt</button>
+      <button class="btn ghost" id="forgeBtn" disabled>Try to forge it</button>
+    </div>
+    <div class="receipt" id="receipt"></div>
+  </div>
+
   <footer>
     <a class="cta solid" href="./ingest.html">← Came from an export? Map it first</a>
     <a class="cta ghost" href="https://www.ai-nativesolutions.com">Talk to us about a build →</a>
@@ -90,6 +113,7 @@
 
 <script type="module">
 import { SEATS, ARMOURY, canEquip, emptyLoadout, equip, unequip, loadoutStatus, organById } from './loadout.mjs?v=1';
+import { sealBlueprint, verifyBlueprint, blueprintBody, sha256, canon } from './blueprint.mjs?v=1';
 
 let loadout = emptyLoadout();
 // a small honest starter so the sheet isn't empty on arrival
@@ -155,6 +179,48 @@ function wire(){
     el.ondrop = (e) => { e.preventDefault(); el.classList.remove('over'); if(dragId){ tryEquip(el.dataset.seat, dragId); dragId=null; } };
   });
 }
+
+// ── seal the loadout into a signed, verifiable company blueprint ──
+let currentReceipt = null;
+function renderReceipt(receipt, verdict){
+  const el = document.getElementById('receipt');
+  const seatLines = SEATS.filter(s=>receipt.seats[s]&&receipt.seats[s].length)
+    .map(s=>`  <span class="k">${esc(s)}</span> <span class="v">${receipt.seats[s].map(o=>esc(o.repo)+' ('+o.tier+')').join(', ')}</span>`).join('\n');
+  el.innerHTML =
+    `<span class="verdict ${verdict.valid?'ok':'no'}">${verdict.valid?'VERIFIED ✓':'BLOCKED ✗'}</span> <span class="v">${esc(verdict.why)}</span>\n\n`+
+    `<span class="k">company</span> <span class="v">${esc(receipt.company)}</span>\n`+
+    `<span class="k">seats</span> <span class="v">${receipt.coverage.seatsFilled}/${receipt.coverage.totalSeats}</span>  <span class="k">organs</span> <span class="v">${receipt.coverage.equipped} (${receipt.coverage.proven} proven, ${receipt.coverage.works} works)</span>\n`+
+    seatLines+`\n\n<span class="k">blueprint hash</span> <span class="h">${esc(receipt.blueprintHash)}</span>`;
+  el.classList.add('show');
+}
+document.getElementById('sealBtn').addEventListener('click', ()=>{
+  const company = document.getElementById('company').value || 'your company';
+  const s = sealBlueprint(loadout, { company, createdAt: new Date().toISOString() });
+  if(!s.ok){ toast(s.why); return; }
+  currentReceipt = s.receipt;
+  renderReceipt(currentReceipt, verifyBlueprint(currentReceipt));
+  document.getElementById('dlBtn').disabled = false;
+  document.getElementById('forgeBtn').disabled = false;
+});
+document.getElementById('dlBtn').addEventListener('click', ()=>{
+  if(!currentReceipt) return;
+  const blob = new Blob([JSON.stringify(currentReceipt,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='fallkit-company-blueprint.json'; a.click(); URL.revokeObjectURL(a.href);
+});
+document.getElementById('forgeBtn').addEventListener('click', ()=>{
+  if(!currentReceipt) return;
+  const forgedA = { ...currentReceipt, company: currentReceipt.company + ' (edited)' }; // altered field, stale hash
+  const vA = verifyBlueprint(forgedA);
+  const body = blueprintBody(loadout, { company: currentReceipt.company, createdAt: currentReceipt.createdAt });
+  body.seats['Trust rail'] = [...(body.seats['Trust rail']||[]), { id:'the-wallet', repo:'the-wallet', tier:'prototype' }];
+  const forgedB = { ...body, blueprintHash: sha256(canon(body)).hash }; // ungated organ + a VALID recomputed hash
+  const vB = verifyBlueprint(forgedB);
+  const el = document.getElementById('receipt');
+  el.innerHTML = `<span class="verdict ok">VERIFIED ✓</span> <span class="v">the untouched receipt verifies.</span>\n\n`+
+    `<span class="v">forge A — edit one field, keep the hash:</span>\n  <span class="verdict no">BLOCKED ✗</span> <span class="v">${esc(vA.why)}</span>\n\n`+
+    `<span class="v">forge B — smuggle an ungated organ in AND recompute a valid hash:</span>\n  <span class="verdict no">BLOCKED ✗</span> <span class="v">${esc(vB.why)}</span>`;
+  el.classList.add('show');
+});
 
 render();
 </script>
