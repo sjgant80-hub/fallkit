@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fallkit — map your stack</title>
+<meta name="description" content="Paste the tools your firm pays for. fallkit maps each one to a real, live build you could own and run yourself — and says honestly where there's no equivalent yet. Names only; nothing leaves your browser. No pricing, no data handover.">
+<meta property="og:title" content="fallkit — map your stack">
+<meta property="og:description" content="See which of your tools you could own instead of rent — and where there's honestly no equivalent yet. Runs entirely in your browser.">
+<meta property="og:type" content="website">
+<link rel="canonical" href="https://sjgant80-hub.github.io/fallkit/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    { "@type": "WebApplication", "name": "fallkit — map your stack", "url": "https://sjgant80-hub.github.io/fallkit/",
+      "applicationCategory": "BusinessApplication", "operatingSystem": "Any (runs in the browser)",
+      "description": "Paste the tools a company pays for; fallkit maps each to a real, live owned-equivalent build, or says honestly where none exists yet. Names only, nothing leaves the browser, no pricing.",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "GBP", "description": "Free to use." },
+      "publisher": { "@type": "Organization", "name": "AI-Native Solutions", "url": "https://www.ai-nativesolutions.com" } },
+    { "@type": "FAQPage", "mainEntity": [
+      { "@type": "Question", "name": "Does my data leave the browser?", "acceptedAnswer": { "@type": "Answer", "text": "No. You paste tool names only — never data, never a key — and the mapping runs entirely in your browser against a fixed table. A live counter shows zero external requests." } },
+      { "@type": "Question", "name": "What does MATCHED / PARTIAL / NONE mean?", "acceptedAnswer": { "@type": "Answer", "text": "MATCHED: a live build already does that tool's core job. PARTIAL: a build covers part of it, with the gap named. NONE: no equivalent exists yet, said plainly. UNKNOWN: the tool name wasn't recognised." } },
+      { "@type": "Question", "name": "Is the mapping an AI guess?", "acceptedAnswer": { "@type": "Answer", "text": "No. It is a fixed, reviewed table — the same tool list gives the same map every time — and every MATCHED points at a repo that is live right now and passed its own gate before being named." } }
+    ] }
+  ]
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0a0f; --panel:#141218; --panel2:#191620; --line:#2b251f; --ink:#e2d9c8; --dim:#8f8778;
+    --gold:#d4a017; --gold2:#ffb648; --matched:#46c586; --matched-bg:#10261c; --partial:#e0a83a; --partial-bg:#2a2210;
+    --none:#8f8778; --none-bg:#17151b; --unknown:#6f6a80; --mono:'DM Mono',ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:0 20px 80px}
+  a{color:var(--gold)}
+  .mono{font-family:var(--mono)}
+  .net{position:sticky;top:0;z-index:20;background:rgba(11,10,15,.88);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+    margin:0 -20px;padding:8px 20px;font-size:.8rem;color:var(--dim);text-align:center}
+  .net b{color:var(--matched);font-family:var(--mono)}
+  .net.warn b{color:#ff6b6b}
+  header{padding:56px 0 24px}
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+  h1{font:700 clamp(2rem,5vw,3rem)/1.08 'Playfair Display',Georgia,serif;margin:12px 0 12px}
+  .lede{color:var(--dim);max-width:640px}
+  .lede b{color:var(--ink)}
+  textarea{width:100%;background:#0d0c12;border:1px solid var(--line);border-radius:11px;color:var(--ink);
+    font-family:var(--mono);font-size:.9rem;padding:14px 16px;resize:vertical;min-height:130px;margin-top:20px}
+  .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px}
+  .btn{font:600 .95rem Inter,sans-serif;background:linear-gradient(96deg,var(--gold),var(--gold2));color:#161006;border:0;
+    border-radius:10px;padding:12px 22px;cursor:pointer}
+  .btn:hover{filter:brightness(1.07)}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);font-weight:500}
+  .btn.ghost:hover{border-color:var(--gold)}
+  .summary{margin-top:26px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px 20px;display:none}
+  .summary.show{display:block}
+  .cov{font-size:1.05rem;color:var(--ink);margin:0 0 14px}
+  .bar{display:flex;height:12px;border-radius:7px;overflow:hidden;border:1px solid var(--line);background:#0d0c12}
+  .bar i{display:block;height:100%}
+  .bar .m{background:var(--matched)} .bar .p{background:var(--partial)} .bar .n{background:var(--none)} .bar .u{background:var(--unknown)}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:10px;font-size:.8rem;color:var(--dim)}
+  .legend span{display:inline-flex;gap:6px;align-items:center}
+  .dot{width:9px;height:9px;border-radius:50%}
+  .dot.m{background:var(--matched)} .dot.p{background:var(--partial)} .dot.n{background:var(--none)} .dot.u{background:var(--unknown)}
+  .seats{margin-top:14px;display:none}
+  .seats.show{display:block}
+  .seat{margin-top:16px}
+  .seat h2{font:600 1.15rem 'Playfair Display',Georgia,serif;color:var(--gold);margin:0 0 4px}
+  .seat .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px;margin-top:8px}
+  .card{background:var(--panel);border:1px solid var(--line);border-left-width:3px;border-radius:10px;padding:12px 14px}
+  .card.m{border-left-color:var(--matched)} .card.p{border-left-color:var(--partial)}
+  .card.n{border-left-color:var(--none)} .card.u{border-left-color:var(--unknown);border-left-style:dashed}
+  .card .tool{font-weight:600;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .card .tier{font-family:var(--mono);font-size:.66rem;letter-spacing:.05em;padding:2px 7px;border-radius:5px}
+  .tier.m{background:var(--matched-bg);color:var(--matched)} .tier.p{background:var(--partial-bg);color:var(--partial)}
+  .tier.n{background:var(--none-bg);color:var(--none)} .tier.u{background:var(--none-bg);color:var(--unknown)}
+  .card .organ{font-size:.82rem;color:var(--dim);margin-top:6px}
+  .card .organ a{color:var(--gold);text-decoration:none} .card .organ a:hover{text-decoration:underline}
+  .card .note{font-size:.8rem;color:var(--dim);margin-top:5px;font-style:italic}
+  .queue{margin-top:24px;background:linear-gradient(120deg,rgba(212,160,23,.08),transparent);border:1px solid var(--line);border-radius:12px;padding:16px 18px;display:none}
+  .queue.show{display:block}
+  .queue b{color:var(--gold)}
+  footer{margin-top:44px;border-top:1px solid var(--line);padding-top:22px;color:var(--dim);font-size:.85rem}
+  .cta{display:inline-block;margin:4px 8px 4px 0;padding:11px 18px;border-radius:10px;text-decoration:none}
+  .cta.solid{background:linear-gradient(96deg,var(--gold),var(--gold2));color:#161006;font-weight:600}
+  .cta.ghost{border:1px solid var(--line);color:var(--ink)}
+  .badge{font-family:var(--mono);font-size:.72rem;color:var(--dim)}
+  noscript{display:block;padding:16px;color:#ff6b6b}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="net" id="net">Runs in your browser · external requests: <b id="netCount">0</b> · nothing leaves this page</div>
+  <header>
+    <div class="eyebrow">AI-Native Solutions · fallkit</div>
+    <h1>Map your stack.</h1>
+    <p class="lede">Paste the tools your firm pays for — <b>names only, nothing else</b>. fallkit shows which ones you could <b>own and run yourself</b>, which are a partial fit, and where there's honestly <b>no equivalent yet</b>. It's a fixed, reviewed map — every match points at a build that's live right now, and none of your data goes anywhere.</p>
+    <textarea id="tools" spellcheck="false">Salesforce
+HubSpot
+Xero
+QuickBooks
+DocuSign
+Gmail
+Slack
+Zoom
+BambooHR
+Calendly
+Aircall
+Stripe
+Okta
+Notion</textarea>
+    <div class="row">
+      <button class="btn" id="mapBtn">Map my stack →</button>
+      <button class="btn ghost" id="clearBtn">Clear</button>
+      <span class="badge">names only · no sign-in · no data leaves the page</span>
+    </div>
+  </header>
+
+  <noscript>fallkit maps your stack in the browser and needs JavaScript enabled.</noscript>
+
+  <div class="summary" id="summary">
+    <p class="cov" id="cov"></p>
+    <div class="bar" id="bar"></div>
+    <div class="legend">
+      <span><i class="dot m"></i> owned equivalent</span>
+      <span><i class="dot p"></i> partial</span>
+      <span><i class="dot n"></i> no equivalent yet</span>
+      <span><i class="dot u"></i> not recognised</span>
+    </div>
+  </div>
+
+  <div class="seats" id="seats"></div>
+  <div class="queue" id="queue"></div>
+
+  <footer>
+    <a class="cta solid" href="https://www.ai-nativesolutions.com">Talk to us about a build →</a>
+    <a class="cta ghost" href="https://sjgant80-hub.github.io/sovereign-demo/">Walk the architecture live →</a>
+    <p style="margin-top:16px">fallkit maps to real, live builds — none reimplemented here. A match is a claim you can re-check by opening that one repo; the mapping runs on a fixed, reviewed table in your browser, never an AI guess. <span class="badge">source: <a href="https://github.com/sjgant80-hub/fallkit">github.com/sjgant80-hub/fallkit</a> · MIT</span></p>
+    <p class="badge">Powered by the Konomi architecture, created by Thomas Frumkin.</p>
+  </footer>
+</div>
+
+<script type="module">
+import { assembleMap, coverageStatement, SEATS } from './fallkit.mjs?v=1';
+
+// prove local-first: count anything trying to leave (the font stylesheet loaded before this installs)
+let external = 0;
+const bump = () => { external++; document.getElementById('netCount').textContent = external; document.getElementById('net').classList.add('warn'); };
+const _f = window.fetch; window.fetch = function(...a){ bump(); return _f.apply(this,a); };
+const _o = XMLHttpRequest.prototype.open; XMLHttpRequest.prototype.open = function(...a){ bump(); return _o.apply(this,a); };
+
+const T = { MATCHED:'m', PARTIAL:'p', NONE:'n', UNKNOWN:'u' };
+const esc = (s)=> String(s).replace(/[&<>]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;' }[c]));
+
+function render() {
+  const lines = document.getElementById('tools').value.split('\n');
+  const m = assembleMap(lines);
+  if (!m.ok) return;
+  const c = m.coverage;
+  document.getElementById('cov').textContent = coverageStatement(c);
+  const pct = (n)=> c.total ? (n/c.total*100).toFixed(1)+'%' : '0%';
+  document.getElementById('bar').innerHTML =
+    `<i class="m" style="width:${pct(c.MATCHED)}"></i><i class="p" style="width:${pct(c.PARTIAL)}"></i><i class="n" style="width:${pct(c.NONE)}"></i><i class="u" style="width:${pct(c.UNKNOWN)}"></i>`;
+  document.getElementById('summary').classList.add('show');
+
+  const seatsEl = document.getElementById('seats');
+  const order = [...SEATS, 'Unassigned'];
+  seatsEl.innerHTML = order.filter(s => m.seats[s] && m.seats[s].length).map(s => {
+    const label = s === 'Unassigned' ? 'No equivalent yet / not recognised' : s;
+    const cards = m.seats[s].map(t => {
+      const cls = T[t.tier];
+      const organ = t.repo
+        ? `<div class="organ">→ <a href="https://sjgant80-hub.github.io/${t.repo}/" target="_blank" rel="noopener">${t.repo}</a> — ${esc(t.does)}</div>`
+        : '';
+      return `<div class="card ${cls}"><div class="tool"><span>${esc(t.input)}</span><span class="tier ${cls}">${t.tier}</span></div>${organ}<div class="note">${esc(t.note)}</div></div>`;
+    }).join('');
+    return `<div class="seat"><h2>${esc(label)}</h2><div class="cards">${cards}</div></div>`;
+  }).join('');
+  seatsEl.classList.add('show');
+
+  // the gaps ARE the build queue — framed honestly, not as a failure
+  const gaps = m.classified.filter(t => t.tier === 'NONE' || t.tier === 'UNKNOWN').map(t => t.input);
+  const q = document.getElementById('queue');
+  if (gaps.length) {
+    q.innerHTML = `<b>${gaps.length} of your tools have no owned equivalent yet:</b> ${gaps.map(esc).join(', ')}. That's not a gap in the pitch — it's the honest build queue. If one of these is core to your firm, it's exactly what a custom build would add next.`;
+    q.classList.add('show');
+  } else { q.classList.remove('show'); }
+}
+
+document.getElementById('mapBtn').addEventListener('click', render);
+document.getElementById('clearBtn').addEventListener('click', ()=>{
+  document.getElementById('tools').value='';
+  document.getElementById('summary').classList.remove('show');
+  document.getElementById('seats').classList.remove('show');
+  document.getElementById('queue').classList.remove('show');
+});
+render(); // map the example list on load
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "fallkit",
+  "version": "1.0.0",
+  "description": "Paste the tools a company pays for; fallkit maps each to a real, live owned-equivalent estate build, or says honestly where none exists yet. Slice-zero of the auto-architect.",
+  "type": "module",
+  "main": "fallkit.mjs",
+  "scripts": {
+    "test": "node --test"
+  },
+  "license": "MIT",
+  "author": "sjgant80-hub <sjgant80@gmail.com>"
+}
