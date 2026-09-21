@@ -1,0 +1,33 @@
+# fallkit — map your stack
+
+> Paste the tools a company pays for (names only) and fallkit maps each one to a real, live estate build
+> you could own and run yourself — or says honestly where there's no equivalent yet. It runs entirely in
+> the browser against a fixed, reviewed table (never an AI guess); nothing leaves the page, and there is
+> no pricing. Slice-zero of the auto-architect. Published by AI-Native Solutions.
+
+## What it does
+
+- Reads a list of tool names (e.g. Salesforce, Xero, DocuSign, Gmail, Aircall).
+- Classifies each into one of four honest buckets:
+  - MATCHED — a live build already does that tool's core job (names the repo, which is live now).
+  - PARTIAL — a build covers part of it, with the gap named.
+  - NONE — no equivalent exists yet, said plainly (e.g. voice agents, scheduling, payment processors).
+  - UNKNOWN — the tool name wasn't recognised.
+- Groups the result into eight company "seats" (Sales & CRM, Money, Legal, People, Work, Office, Overseer, Trust rail).
+- States coverage as a count, never a price.
+- Frames the NONE/UNKNOWN list as an honest build queue, not a hidden gap.
+
+## Real builds it maps to (all live)
+
+fallsalescrm, fallcrm, fallcall, fallpost (Sales & CRM) · fallaccount, fallinvoice (Money) · falljustice,
+fallsignature (Legal) · fallhr, fallrecruit (People) · fallmail, fallscribe (Work) · glampos (Office) ·
+agent-proof (Overseer) · the-wallet (Trust rail). A MATCH is a claim re-checkable by opening that one repo.
+
+## Honesty notes
+
+- Names only — never data, never an API key value. A live counter shows zero external requests.
+- The map is fixed and reviewed, so the same list gives the same result on every machine.
+- It maps and advises; it never runs a company, moves money, signs, or sends anything.
+
+Source: https://github.com/sjgant80-hub/fallkit · MIT
+Powered by the Konomi architecture, created by Thomas Frumkin.
