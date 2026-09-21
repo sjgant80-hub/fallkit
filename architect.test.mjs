@@ -66,6 +66,18 @@ test('the same gap from a tool AND an export ranks higher (demand is a count)', 
   assert.equal(r.queue[0].demand, 2);
 });
 
+test('autoArchitect emits a build plan: openings -> mint targets, ungated -> gate targets', () => {
+  const r = autoArchitect(meridian());
+  // 4 gaps (Aircall, Notion, Wobblegizmo, calendar.csv) -> 4 mint targets, each starting at 1b
+  assert.equal(r.buildPlan.summary.mint, 4);
+  assert.ok(r.buildPlan.toMint.every((t) => t.startTier === '1b' && t.via === 'fallforgemint' && t.status === 'needs-data'));
+  // 2 ungated matches (fallsalescrm, the-wallet) -> 2 gate targets via witness
+  assert.equal(r.buildPlan.summary.gate, 2);
+  assert.ok(r.buildPlan.toGate.every((t) => t.via === 'witness'));
+  assert.equal(r.summary.mint, 4);
+  assert.equal(r.summary.gate, 2);
+});
+
 test('autoArchitect accepts a direct estate-organ list (point it at your own repos)', () => {
   const r = autoArchitect({ company: 'Estate', organs: ['fallaccount', 'fallcrm', 'not-a-real-repo'] });
   // fallaccount (proven) equips, fallcrm (prototype) is a matched-but-ungated, unknown repo is skipped

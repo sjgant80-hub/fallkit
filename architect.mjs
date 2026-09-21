@@ -17,6 +17,7 @@ import { combineSources } from './multi.mjs';
 import { organById, canEquip, emptyLoadout, equip } from './loadout.mjs';
 import { sealBlueprint, verifyBlueprint } from './blueprint.mjs';
 import { mergeSignals, rankQueue } from './queue.mjs';
+import { mintPortfolio } from './mint.mjs';
 
 const isStr = (v) => typeof v === 'string';
 const isObj = (v) => v && typeof v === 'object' && !Array.isArray(v);
@@ -84,6 +85,10 @@ export function autoArchitect(input) {
   const merged = mergeSignals([], gapSignals);
   const ranked = merged.ok ? rankQueue(merged.queue).ranked : [];
 
+  // 6. the wire to the factory: openings -> mint targets (fallforgemint, smallest tier first),
+  //    matched-but-ungated organs -> gate targets (witness). The demand map, made actionable.
+  const buildPlan = mintPortfolio({ gaps: ranked, ungatedMatches });
+
   return {
     ok: true,
     company,
@@ -93,6 +98,7 @@ export function autoArchitect(input) {
     blueprint: sealed.ok ? sealed.receipt : null,
     verified: verified.valid === true,
     queue: ranked,
-    summary: { equipped: equipped.length, ungated: ungatedMatches.length, gaps: ranked.length },
+    buildPlan,
+    summary: { equipped: equipped.length, ungated: ungatedMatches.length, gaps: ranked.length, mint: buildPlan.toMint.length, gate: buildPlan.toGate.length },
   };
 }

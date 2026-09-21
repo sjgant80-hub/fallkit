@@ -138,6 +138,13 @@ function show(r){
   const qBlock = r.queue.length
     ? r.queue.map(q=>`<div class="qrow"><span class="rank">${q.rank}</span><span>${esc(q.gap)}<span class="d"> · ${esc(q.kind)}</span></span><span class="d">${q.demand} ${q.demand===1?'signal':'signals'}</span></div>`).join('')
     : '<span class="badge">no gaps — every need is covered.</span>';
+  const bp5 = r.buildPlan || { toMint: [], toGate: [] };
+  const mintRows = bp5.toMint.length
+    ? bp5.toMint.map(t=>`<div class="qrow"><span class="rank">⚒</span><span>mint <b>${esc(t.capability)}</b><span class="d"> · via ${esc(t.via)} · start ${esc(t.startTier)} → escalate</span></span><span class="d">${esc(t.status)}</span></div>`).join('')
+    : '<span class="badge">no openings to mint — every need is covered by an owned organ.</span>';
+  const gateRows = bp5.toGate.length
+    ? bp5.toGate.map(t=>`<div class="qrow"><span class="rank">🛡</span><span>gate <b>${esc(t.repo)}</b><span class="d"> · via ${esc(t.via)}</span></span><span class="d">${esc(t.status)}</span></div>`).join('')
+    : '<span class="badge">nothing to gate.</span>';
 
   document.getElementById('out').innerHTML = `
     <div class="stage"><h2>1 · Equipped loadout <span class="n">${r.summary.equipped} proven/works organs</span></h2>
@@ -147,7 +154,10 @@ function show(r){
     <div class="stage"><h2>3 · Signed blueprint <a href="./loadout.html">open the loadout →</a></h2>
       ${bpBlock}</div>
     <div class="stage"><h2>4 · Build queue <a href="./queue.html">open the queue →</a><span class="n">${r.summary.gaps} gaps ranked by demand</span></h2>
-      ${qBlock}</div>`;
+      ${qBlock}</div>
+    <div class="stage"><h2>5 · Build plan — the compiler output <span class="n">${bp5.toMint.length} to mint · ${bp5.toGate.length} to gate</span></h2>
+      <p style="color:var(--dim);font-size:.84rem;margin:6px 0 8px">Every opening becomes a <b>mint target</b> (fallforgemint — smallest tier first, escalate only when the gate says LOSES) and every ungated match a <b>gate target</b> (witness). This is the plan: minting needs your real data turned into train + held-out eval pairs; nothing is built or run here.</p>
+      ${mintRows}${gateRows}</div>`;
 
   const dl = document.getElementById('dlBp');
   if (dl) dl.onclick = ()=>{ if(!currentBlueprint) return; const b=new Blob([JSON.stringify(currentBlueprint,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='fallkit-company-blueprint.json'; a.click(); URL.revokeObjectURL(a.href); };
