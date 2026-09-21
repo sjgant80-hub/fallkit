@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fallkit — kit out your company</title>
+<meta name="description" content="The sovereign stack as a character sheet. Slot proven estate organs into eight company seats — and watch the loadout refuse any gear that hasn't cleared proof-of-play. You can't equip what isn't gated.">
+<meta property="og:title" content="fallkit — kit out your company">
+<meta property="og:description" content="Drag proven organs into the eight seats. Ungated gear can't be equipped — by construction.">
+<link rel="canonical" href="https://sjgant80-hub.github.io/fallkit/loadout.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0a0f; --panel:#141218; --panel2:#191620; --line:#2b251f; --ink:#e2d9c8; --dim:#8f8778;
+    --gold:#d4a017; --gold2:#ffb648; --proven:#46c586; --proven-bg:#10261c; --works:#7aa2ff; --works-bg:#111a2e;
+    --proto:#6b6559; --proto-bg:#15131a; --red:#ff6b6b; --mono:'DM Mono',ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:960px;margin:0 auto;padding:0 20px 80px}
+  a{color:var(--gold)}
+  .status{position:sticky;top:0;z-index:20;background:rgba(11,10,15,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+    margin:0 -20px;padding:10px 20px;font-family:var(--mono);font-size:.82rem;color:var(--dim);text-align:center}
+  .status b{color:var(--proven)}
+  header{padding:44px 0 14px}
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+  .eyebrow a{color:var(--dim);text-decoration:none} .eyebrow a:hover{color:var(--gold)}
+  h1{font:700 clamp(2rem,5vw,2.9rem)/1.08 'Playfair Display',Georgia,serif;margin:10px 0 10px}
+  .lede{color:var(--dim);max-width:680px} .lede b{color:var(--ink)}
+  h2.sec{font:600 1.05rem 'Playfair Display',serif;color:var(--gold);margin:26px 0 4px}
+  .seats{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-top:10px}
+  .seat{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 14px;min-height:96px;transition:.12s}
+  .seat.over{border-color:var(--gold);background:var(--panel2)}
+  .seat h3{margin:0 0 8px;font-size:.82rem;color:var(--dim);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+  .chip{display:flex;justify-content:space-between;align-items:center;gap:8px;background:var(--proven-bg);border:1px solid #1d4634;border-radius:8px;padding:6px 10px;margin-bottom:6px;font-size:.85rem;cursor:pointer}
+  .chip.works{background:var(--works-bg);border-color:#20365e}
+  .chip b{font-weight:600} .chip .x{color:var(--dim);font-family:var(--mono);font-size:.9rem}
+  .chip:hover .x{color:var(--red)}
+  .empty{color:var(--proto);font-size:.8rem;font-style:italic}
+  .armoury{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-top:10px}
+  .card{background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--line);border-radius:10px;padding:11px 13px;cursor:pointer;transition:.12s}
+  .card:hover{border-color:var(--gold)}
+  .card.proven{border-left-color:var(--proven)} .card.works{border-left-color:var(--works)}
+  .card.prototype{border-left-color:var(--proto);opacity:.5;cursor:not-allowed}
+  .card.prototype:hover{border-color:var(--line)}
+  .card .top{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .card .nm{font-weight:600;font-size:.92rem}
+  .card .tier{font-family:var(--mono);font-size:.62rem;letter-spacing:.05em;padding:2px 6px;border-radius:5px}
+  .tier.proven{background:var(--proven-bg);color:var(--proven)} .tier.works{background:var(--works-bg);color:var(--works)}
+  .tier.prototype{background:var(--proto-bg);color:var(--proto)}
+  .card .does{font-size:.78rem;color:var(--dim);margin-top:5px}
+  .card .lock{font-size:.72rem;color:var(--proto);margin-top:6px;font-family:var(--mono)}
+  .toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--red);color:#2a0d0d;font-weight:600;
+    padding:10px 18px;border-radius:10px;font-size:.86rem;opacity:0;transition:.2s;pointer-events:none;max-width:90vw;text-align:center}
+  .toast.show{opacity:1}
+  .grp{font-family:var(--mono);font-size:.72rem;color:var(--dim);margin:16px 0 2px;text-transform:uppercase;letter-spacing:.06em}
+  footer{margin-top:40px;border-top:1px solid var(--line);padding-top:22px;color:var(--dim);font-size:.85rem}
+  .cta{display:inline-block;margin:4px 8px 4px 0;padding:11px 18px;border-radius:10px;text-decoration:none}
+  .cta.solid{background:linear-gradient(96deg,var(--gold),var(--gold2));color:#161006;font-weight:600}
+  .cta.ghost{border:1px solid var(--line);color:var(--ink)}
+  .badge{font-family:var(--mono);font-size:.72rem;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="status" id="status"></div>
+  <header>
+    <div class="eyebrow"><a href="./index.html">← fallkit</a> · kit out your company · slice two</div>
+    <h1>Your company as a character sheet.</h1>
+    <p class="lede">Eight seats, one armoury of real estate organs. Click a <b>proven</b> or <b>works</b> tool to slot it into its seat. The greyed-out ones are <b>prototype</b> — they haven't cleared proof-of-play, so the loadout <b>won't let you equip them</b>, however useful they look. That's the rule from the-armoury: you can't equip ungated gear. Some genuinely good tools (a live CRM, the identity wallet) sit locked here because the strict scan hasn't cleared them yet — the loadout equips what's <em>proven</em>, not what you're sure about.</p>
+  </header>
+
+  <h2 class="sec">The eight seats</h2>
+  <div class="seats" id="seats"></div>
+
+  <h2 class="sec">The armoury</h2>
+  <p class="badge" id="armouryNote"></p>
+  <div id="armoury"></div>
+
+  <footer>
+    <a class="cta solid" href="./ingest.html">← Came from an export? Map it first</a>
+    <a class="cta ghost" href="https://www.ai-nativesolutions.com">Talk to us about a build →</a>
+    <p style="margin-top:16px">Tiers are the estate's own published verdicts (149 proven · 122 works · 1355 prototype). The equip rule is a mutation-gated kernel this page imports; nothing here builds or runs anything. <span class="badge">source: <a href="https://github.com/sjgant80-hub/fallkit">github.com/sjgant80-hub/fallkit</a> · MIT · signed blueprint receipt coming in the next step.</span></p>
+    <p class="badge">Powered by the Konomi architecture, created by Thomas Frumkin.</p>
+  </footer>
+</div>
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { SEATS, ARMOURY, canEquip, emptyLoadout, equip, unequip, loadoutStatus, organById } from './loadout.mjs?v=1';
+
+let loadout = emptyLoadout();
+// a small honest starter so the sheet isn't empty on arrival
+loadout = equip(loadout, 'Money', 'fallaccount').loadout;
+loadout = equip(loadout, 'Overseer', 'agent-proof').loadout;
+
+const esc = (s)=> String(s).replace(/[&<>]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;' }[c]));
+let toastT = null;
+function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove('show'),2600); }
+
+function tryEquip(seat, id){
+  const r = equip(loadout, seat, id);
+  if(r.ok){ loadout = r.loadout; render(); }
+  else { toast(r.why); }
+}
+function tryUnequip(seat, id){ const r = unequip(loadout, seat, id); if(r.ok){ loadout = r.loadout; render(); } }
+
+function render(){
+  const s = loadoutStatus(loadout);
+  document.getElementById('status').innerHTML =
+    `<b>${s.equipped}</b> equipped · ${s.proven} proven · ${s.works} works · ${s.seatsFilled}/${s.totalSeats} seats filled`;
+
+  // seats
+  document.getElementById('seats').innerHTML = SEATS.map(seat => {
+    const ids = loadout[seat] || [];
+    const chips = ids.map(id => { const o = organById(id); if(!o) return '';
+      return `<div class="chip ${o.tier}" data-seat="${esc(seat)}" data-id="${esc(id)}" title="click to remove"><b>${esc(o.repo)}</b><span class="x">✕</span></div>`;
+    }).join('');
+    return `<div class="seat" data-seat="${esc(seat)}"><h3>${esc(seat)}</h3>${chips || '<div class="empty">empty — drop a proven organ here</div>'}</div>`;
+  }).join('');
+
+  // armoury grouped by seat
+  const groups = SEATS.map(seat => {
+    const cards = ARMOURY.filter(o => o.seat === seat).map(o => {
+      const c = canEquip(o);
+      const equipped = (loadout[seat]||[]).includes(o.id);
+      const lock = c.allowed ? '' : `<div class="lock">🔒 ${esc(c.reason)}</div>`;
+      const draggable = c.allowed ? 'draggable="true"' : '';
+      return `<div class="card ${o.tier}${equipped?' on':''}" data-seat="${esc(seat)}" data-id="${esc(o.id)}" ${draggable}>
+        <div class="top"><span class="nm">${esc(o.repo)}</span><span class="tier ${o.tier}">${o.tier}</span></div>
+        <div class="does">${esc(o.does)}</div>${lock}</div>`;
+    }).join('');
+    return `<div class="grp">${esc(seat)}</div><div class="armoury">${cards}</div>`;
+  }).join('');
+  document.getElementById('armoury').innerHTML = groups;
+  document.getElementById('armouryNote').textContent =
+    `${ARMOURY.filter(o=>canEquip(o).allowed).length} equippable · ${ARMOURY.filter(o=>!canEquip(o).allowed).length} locked (prototype). Click a card to equip; click a chip to remove.`;
+  wire();
+}
+
+let dragId = null, dragSeat = null;
+function wire(){
+  document.querySelectorAll('#armoury .card').forEach(el => {
+    el.onclick = () => tryEquip(el.dataset.seat, el.dataset.id);
+    el.ondragstart = (e) => { dragId = el.dataset.id; dragSeat = el.dataset.seat; e.dataTransfer.effectAllowed='copy'; };
+  });
+  document.querySelectorAll('#seats .chip').forEach(el => {
+    el.onclick = () => tryUnequip(el.dataset.seat, el.dataset.id);
+  });
+  document.querySelectorAll('#seats .seat').forEach(el => {
+    el.ondragover = (e) => { e.preventDefault(); el.classList.add('over'); };
+    el.ondragleave = () => el.classList.remove('over');
+    el.ondrop = (e) => { e.preventDefault(); el.classList.remove('over'); if(dragId){ tryEquip(el.dataset.seat, dragId); dragId=null; } };
+  });
+}
+
+render();
+</script>
+</body>
+</html>
