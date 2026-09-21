@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fallkit — the auto-architect</title>
+<meta name="description" content="Point it at a company's whole picture — the tools it pays for and its real exports — and it assembles a gated sovereign company in one pass: the equipped loadout, a signed and verified blueprint, and the honest build queue. Everything runs in your browser; nothing is built or run.">
+<meta property="og:title" content="fallkit — the auto-architect">
+<meta property="og:description" content="Tools + exports → a gated loadout, a signed blueprint, and a ranked build queue — one pass, in your browser.">
+<link rel="canonical" href="https://sjgant80-hub.github.io/fallkit/architect.html">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0b0a0f;--panel:#141218;--panel2:#191620;--line:#2b251f;--ink:#e2d9c8;--dim:#8f8778;--gold:#d4a017;--gold2:#ffb648;--ok:#46c586;--ok-bg:#10261c;--proto:#8f8778;--blue:#7aa2ff;--mono:'DM Mono',ui-monospace,Menlo,monospace}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:0 20px 80px}
+  a{color:var(--gold)} .mono{font-family:var(--mono)}
+  .net{position:sticky;top:0;z-index:20;background:rgba(11,10,15,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin:0 -20px;padding:8px 20px;font-size:.8rem;color:var(--dim);text-align:center}
+  .net b{color:var(--ok);font-family:var(--mono)} .net.warn b{color:#ff6b6b}
+  header{padding:48px 0 14px}
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+  .eyebrow a{color:var(--dim);text-decoration:none} .eyebrow a:hover{color:var(--gold)}
+  h1{font:700 clamp(2rem,5.4vw,3.1rem)/1.07 'Playfair Display',Georgia,serif;margin:10px 0 10px}
+  .lede{color:var(--dim);max-width:700px} .lede b{color:var(--ink)}
+  .in{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px}
+  @media(max-width:600px){.in{grid-template-columns:1fr}}
+  .in label{display:block;font-size:.76rem;color:var(--gold);font-family:var(--mono);margin-bottom:4px}
+  textarea{width:100%;background:#0d0c12;border:1px solid var(--line);border-radius:9px;color:var(--ink);font-family:var(--mono);font-size:.76rem;padding:10px 12px;resize:vertical;min-height:96px}
+  .runrow{margin-top:14px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+  .btn{font:600 .95rem Inter,sans-serif;background:linear-gradient(96deg,var(--gold),var(--gold2));color:#161006;border:0;border-radius:10px;padding:12px 22px;cursor:pointer}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);font-weight:500}
+  .stage{margin-top:20px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .stage h2{font:600 1.05rem 'Playfair Display',serif;color:var(--gold);margin:0 0 4px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+  .stage h2 .n{font-family:var(--mono);font-size:.72rem;color:var(--dim)}
+  .stage h2 a{font-size:.72rem;color:var(--gold)}
+  .seats{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px;margin-top:8px}
+  .seat{background:var(--panel2);border:1px solid var(--line);border-radius:9px;padding:9px 12px;font-size:.84rem}
+  .seat h3{margin:0 0 4px;font-size:.7rem;color:var(--dim);text-transform:uppercase;letter-spacing:.05em}
+  .seat .o{font-family:var(--mono);font-size:.78rem;color:var(--ok)} .seat.empty .o{color:var(--proto);font-style:italic}
+  .chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+  .chip{font-family:var(--mono);font-size:.74rem;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:3px 9px;color:var(--dim)}
+  .chip.proto{border-color:#3a3320}
+  .receipt{font-family:var(--mono);font-size:.78rem;color:var(--dim);white-space:pre-wrap;word-break:break-all;margin-top:6px}
+  .receipt .k{color:var(--gold)} .receipt .v{color:var(--ink)} .receipt .h{color:var(--blue)}
+  .verdict{display:inline-block;font-weight:700;font-family:var(--mono);font-size:.78rem;padding:3px 11px;border-radius:6px}
+  .verdict.ok{background:var(--ok-bg);color:var(--ok)}
+  .qrow{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;font-size:.85rem;padding:6px 0;border-bottom:1px solid var(--line)}
+  .qrow .rank{font-family:var(--mono);color:var(--gold);text-align:center}
+  .qrow .d{font-family:var(--mono);font-size:.78rem;color:var(--dim)}
+  .btn.sm{padding:7px 13px;font-size:.82rem}
+  footer{margin-top:40px;border-top:1px solid var(--line);padding-top:22px;color:var(--dim);font-size:.85rem}
+  .cta{display:inline-block;margin:4px 8px 4px 0;padding:11px 18px;border-radius:10px;text-decoration:none}
+  .cta.solid{background:linear-gradient(96deg,var(--gold),var(--gold2));color:#161006;font-weight:600}
+  .cta.ghost{border:1px solid var(--line);color:var(--ink)}
+  .badge{font-family:var(--mono);font-size:.72rem;color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="net" id="net">Runs in your browser · external requests: <b id="netCount">0</b> · nothing is built, run, or sent</div>
+  <header>
+    <div class="eyebrow"><a href="./index.html">← fallkit</a> · the auto-architect · slice six</div>
+    <h1>Point it at a company. Get a sovereign one.</h1>
+    <p class="lede">The whole pipeline in one pass. Give it a company's tools and its real exports, and it classifies, maps, <b>equips only what's proven</b>, <b>seals a verifiable blueprint</b>, and <b>ranks every gap</b> as the build queue. It assembles a spec, gated for audit — it never builds or runs a company. The four human doors hold.</p>
+    <div class="in">
+      <div><label>Tools the company pays for (one per line)</label><textarea id="tools">Salesforce
+Xero
+DocuSign
+Okta
+Gmail
+Aircall
+Notion</textarea></div>
+      <div><label>Exports (paste a CSV header + rows; one export per box below)</label><textarea id="exp1">Name,Role,Email,Start
+Grace,Ops Lead,grace@x.co,2024-01-10</textarea>
+      <textarea id="exp2" style="margin-top:8px">slot,attendee,zoomlink
+2026-09-10 14:00,ada@x.co,https://…</textarea></div>
+    </div>
+    <div class="runrow"><input id="company" value="Meridian Logistics" style="background:#0d0c12;border:1px solid var(--line);border-radius:8px;color:var(--ink);font:inherit;font-size:.9rem;padding:9px 12px"><button class="btn" id="runBtn">Run the auto-architect →</button></div>
+  </header>
+
+  <div id="out"></div>
+
+  <footer>
+    <a class="cta solid" href="https://www.ai-nativesolutions.com">Talk to us about a build →</a>
+    <a class="cta ghost" href="./index.html">← Back to fallkit</a>
+    <p style="margin-top:16px">One pass, composing six mutation-gated kernels (classify · map · combine · loadout · blueprint · queue) — every one witness-clean, all running in your browser. This is the honest core of the auto-architect: it assembles and proves a spec; a human builds it. <span class="badge">source: <a href="https://github.com/sjgant80-hub/fallkit">github.com/sjgant80-hub/fallkit</a> · MIT</span></p>
+    <p class="badge">Powered by the Konomi architecture, created by Thomas Frumkin.</p>
+  </footer>
+</div>
+
+<script type="module">
+import { autoArchitect } from './architect.mjs?v=1';
+import { parseColumns } from './fieldmap.mjs?v=1';
+import { SEATS } from './loadout.mjs?v=1';
+
+let external = 0;
+const bump = () => { external++; document.getElementById('netCount').textContent = external; document.getElementById('net').classList.add('warn'); };
+const _f = window.fetch; window.fetch = function(...a){ bump(); return _f.apply(this,a); };
+
+const esc = (s)=> String(s).replace(/[&<>]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;' }[c]));
+let currentBlueprint = null;
+
+function run(){
+  const company = document.getElementById('company').value || 'a company';
+  const tools = document.getElementById('tools').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  const exportList = [];
+  for (const [id,name] of [['exp1','export-1'],['exp2','export-2']]){
+    const text = document.getElementById(id).value.trim();
+    if(!text) continue;
+    const p = parseColumns(text);
+    if(p.ok) exportList.push({ name: name+'.csv', columns: p.columns, recordCount: p.recordCount });
+  }
+  const r = autoArchitect({ company, createdAt: new Date().toISOString(), tools, exports: exportList });
+  currentBlueprint = r.blueprint;
+
+  const bp = r.blueprint;
+  const seatBlock = SEATS.map(seat=>{
+    const organs = (r.loadout[seat]||[]);
+    return `<div class="seat${organs.length?'':' empty'}"><h3>${esc(seat)}</h3><div class="o">${organs.length?organs.map(esc).join(', '):'—'}</div></div>`;
+  }).join('');
+  const ungated = r.ungatedMatches.length
+    ? `<div class="chips">${r.ungatedMatches.map(u=>`<span class="chip proto">${esc(u.repo)} · ${esc(u.tier)}</span>`).join('')}</div>`
+    : '<span class="badge">none — every match was gated.</span>';
+  const bpBlock = bp
+    ? `<span class="verdict ok">${r.verified?'VERIFIED ✓':'—'}</span>
+       <div class="receipt"><span class="k">company</span> <span class="v">${esc(bp.company)}</span>  <span class="k">seats</span> <span class="v">${bp.coverage.seatsFilled}/${bp.coverage.totalSeats}</span>  <span class="k">organs</span> <span class="v">${bp.coverage.equipped} (${bp.coverage.proven} proven, ${bp.coverage.works} works)</span>
+<span class="k">blueprint hash</span> <span class="h">${esc(bp.blueprintHash)}</span></div>
+       <button class="btn ghost sm" id="dlBp" style="margin-top:8px">Download blueprint</button>`
+    : '<span class="badge">nothing to seal yet.</span>';
+  const qBlock = r.queue.length
+    ? r.queue.map(q=>`<div class="qrow"><span class="rank">${q.rank}</span><span>${esc(q.gap)}<span class="d"> · ${esc(q.kind)}</span></span><span class="d">${q.demand} ${q.demand===1?'signal':'signals'}</span></div>`).join('')
+    : '<span class="badge">no gaps — every need is covered.</span>';
+
+  document.getElementById('out').innerHTML = `
+    <div class="stage"><h2>1 · Equipped loadout <span class="n">${r.summary.equipped} proven/works organs</span></h2>
+      <div class="seats">${seatBlock}</div></div>
+    <div class="stage"><h2>2 · Matched, but not gated yet <span class="n">${r.summary.ungated} — real matches the loadout won't equip</span></h2>
+      ${ungated}</div>
+    <div class="stage"><h2>3 · Signed blueprint <a href="./loadout.html">open the loadout →</a></h2>
+      ${bpBlock}</div>
+    <div class="stage"><h2>4 · Build queue <a href="./queue.html">open the queue →</a><span class="n">${r.summary.gaps} gaps ranked by demand</span></h2>
+      ${qBlock}</div>`;
+
+  const dl = document.getElementById('dlBp');
+  if (dl) dl.onclick = ()=>{ if(!currentBlueprint) return; const b=new Blob([JSON.stringify(currentBlueprint,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='fallkit-company-blueprint.json'; a.click(); URL.revokeObjectURL(a.href); };
+}
+document.getElementById('runBtn').addEventListener('click', run);
+run();
+</script>
+</body>
+</html>
