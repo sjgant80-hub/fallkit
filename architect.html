@@ -77,6 +77,7 @@ Grace,Ops Lead,grace@x.co,2024-01-10</textarea>
 2026-09-10 14:00,ada@x.co,https://…</textarea></div>
     </div>
     <div class="runrow"><input id="company" value="Meridian Logistics" style="background:#0d0c12;border:1px solid var(--line);border-radius:8px;color:var(--ink);font:inherit;font-size:.9rem;padding:9px 12px"><button class="btn" id="runBtn">Run the auto-architect →</button></div>
+    <div class="runrow"><button class="btn ghost" id="fallcorpBtn">▶ Point it at the estate itself — auto-architect FallCorp (21 real organs)</button></div>
   </header>
 
   <div id="out"></div>
@@ -111,9 +112,15 @@ function run(){
     const p = parseColumns(text);
     if(p.ok) exportList.push({ name: name+'.csv', columns: p.columns, recordCount: p.recordCount });
   }
-  const r = autoArchitect({ company, createdAt: new Date().toISOString(), tools, exports: exportList });
-  currentBlueprint = r.blueprint;
+  show(autoArchitect({ company, createdAt: new Date().toISOString(), tools, exports: exportList }));
+}
 
+// FallCorp's real bundle (21 organs from its own company-data.json), pointed at the estate itself.
+const FALLCORP = ['fallclaimonboard','fallform','fallslot','fallclaim','redress-engine','fallclaimpaper','fallsignature','fallclaimpractice','fallledger','fallinvoice','fallap','fallbooks','falljustice','falllist','fallhire','fallrecruit','fallforce','fallcrm','fallcrm-elite','fallmail','witness'];
+function runFallcorp(){ show(autoArchitect({ company: 'FallCorp — the estate’s own SMB stack', createdAt: new Date().toISOString(), organs: FALLCORP })); }
+
+function show(r){
+  currentBlueprint = r.blueprint;
   const bp = r.blueprint;
   const seatBlock = SEATS.map(seat=>{
     const organs = (r.loadout[seat]||[]);
@@ -146,6 +153,7 @@ function run(){
   if (dl) dl.onclick = ()=>{ if(!currentBlueprint) return; const b=new Blob([JSON.stringify(currentBlueprint,null,2)],{type:'application/json'}); const a=document.createElement('a'); a.href=URL.createObjectURL(b); a.download='fallkit-company-blueprint.json'; a.click(); URL.revokeObjectURL(a.href); };
 }
 document.getElementById('runBtn').addEventListener('click', run);
+document.getElementById('fallcorpBtn').addEventListener('click', runFallcorp);
 run();
 </script>
 </body>

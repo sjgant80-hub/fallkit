@@ -48,6 +48,17 @@ export const ARMOURY = [
   { id: 'fallnode',     repo: 'fallnode',     seat: 'Trust rail',  tier: 'proven',    does: 'Sovereign runtime — serve your model on your own metal.' },
   { id: 'the-wallet',   repo: 'the-wallet',   seat: 'Trust rail',  tier: 'prototype', does: 'An Ed25519 identity that is a capability plus a budget.' },
   { id: 'perimeter',    repo: 'perimeter',    seat: 'Trust rail',  tier: 'prototype', does: 'Confidentiality wedge — public-AI prompts are exhibits.' },
+  // organs fallcorp bundles (real tiers from the estate catalogue) — so the auto-architect can be
+  // pointed at the estate's own flagship company and assemble its blueprint honestly.
+  { id: 'fallform',          repo: 'fallform',          seat: 'Work',        tier: 'proven',    does: 'Sovereign forms — intake without a third-party form vendor.' },
+  { id: 'fallclaim',         repo: 'fallclaim',         seat: 'Legal',       tier: 'proven',    does: 'Sovereign case management for UK claims firms.' },
+  { id: 'redress-engine',    repo: 'redress-engine',    seat: 'Legal',       tier: 'works',     does: 'Redress / compensation engine.' },
+  { id: 'fallclaimonboard',  repo: 'fallclaimonboard',  seat: 'Legal',       tier: 'prototype', does: 'FCA CMR-shaped claimant onboarding.' },
+  { id: 'fallclaimpaper',    repo: 'fallclaimpaper',    seat: 'Legal',       tier: 'prototype', does: 'UK claims document generator.' },
+  { id: 'fallclaimpractice', repo: 'fallclaimpractice', seat: 'Money',       tier: 'prototype', does: 'Firm-side accounting / client escrow for claims firms.' },
+  { id: 'fallap',            repo: 'fallap',            seat: 'Money',       tier: 'prototype', does: 'Accounts payable.' },
+  { id: 'fallcrm-elite',     repo: 'fallcrm-elite',     seat: 'Sales & CRM', tier: 'prototype', does: 'Sovereign CRM — signal timelines, agentic follow-up.' },
+  { id: 'witness',           repo: 'witness',           seat: 'Overseer',    tier: 'prototype', does: 'The build gate itself — mutation-tests code before it ships.' },
 ];
 
 export function organById(id) {

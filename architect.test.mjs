@@ -66,6 +66,14 @@ test('the same gap from a tool AND an export ranks higher (demand is a count)', 
   assert.equal(r.queue[0].demand, 2);
 });
 
+test('autoArchitect accepts a direct estate-organ list (point it at your own repos)', () => {
+  const r = autoArchitect({ company: 'Estate', organs: ['fallaccount', 'fallcrm', 'not-a-real-repo'] });
+  // fallaccount (proven) equips, fallcrm (prototype) is a matched-but-ungated, unknown repo is skipped
+  assert.deepEqual(r.equipped.map((e) => e.repo), ['fallaccount']);
+  assert.deepEqual(r.ungatedMatches.map((e) => e.repo), ['fallcrm']);
+  assert.equal(r.verified, true);
+});
+
 test('autoArchitect is total on empty and hostile input', () => {
   assert.equal(autoArchitect(null).ok, false);
   const empty = autoArchitect({});

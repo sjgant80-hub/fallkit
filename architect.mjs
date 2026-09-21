@@ -54,6 +54,11 @@ export function autoArchitect(input) {
     }
   }
 
+  // 2b. estate organs -> a direct candidate list, for pointing it at the estate's own repos (e.g.
+  //     fallcorp's own bundle). Each is a repo name, resolved against the armoury like any other match.
+  const organsIn = isArr(input.organs) ? input.organs : [];
+  for (const repo of organsIn) if (isStr(repo)) candidates.push({ repo, from: 'estate: ' + repo });
+
   // 3. resolve each candidate to an armoury organ; equip the GATED ones (slice-2), list the ungated.
   let loadout = emptyLoadout();
   const equipped = [];
