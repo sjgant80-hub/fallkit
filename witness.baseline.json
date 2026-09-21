@@ -1,0 +1,8 @@
+[
+  {
+    "line": 54,
+    "mutation": "< → <=",
+    "snippet": "for (let t = 16; t < 64; t++) {",
+    "reason": "Equivalent, and checked rather than argued. The SHA-256 message-schedule bound in the vendored sha256 (fallbrain/cascade.mjs, verbatim). The extra iteration runs only at t === 64, writing to w[64] on a Uint32Array(64) — an out-of-range typed-array write, silently discarded, altering no existing word; the compression loop below reads only w[0..63], so it is never observed and the digest is identical. Verified differentially by the sha256 test, which compares this kernel against Node's own crypto.createHash('sha256') across empty, one-block, 100-byte, unicode and punctuation inputs — all match, and this mutant survived them all, i.e. no input distinguishes it."
+  }
+]

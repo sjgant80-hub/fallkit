@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fallkit — map a real export</title>
+<meta name="description" content="Drop in one export (CSV or JSON) from a tool your firm uses. fallkit reads only the shape — the column names and how many records — never the values, and maps it onto the owned equivalent, with a signed scaffold plan you can keep. Nothing is uploaded, stored, or run.">
+<meta property="og:title" content="fallkit — map a real export">
+<meta property="og:description" content="Drop a real export, see it mapped onto the owned equivalent + a signed plan. Reads only the shape; nothing leaves your browser.">
+<link rel="canonical" href="https://sjgant80-hub.github.io/fallkit/ingest.html">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0b0a0f; --panel:#141218; --panel2:#191620; --line:#2b251f; --ink:#e2d9c8; --dim:#8f8778;
+    --gold:#d4a017; --gold2:#ffb648; --mapped:#46c586; --mapped-bg:#10261c; --fuzzy:#e0a83a; --fuzzy-bg:#2a2210;
+    --missing:#8f8778; --extra:#7aa2ff; --mono:'DM Mono',ui-monospace,Menlo,monospace;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 Inter,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:900px;margin:0 auto;padding:0 20px 80px}
+  a{color:var(--gold)}
+  .mono{font-family:var(--mono)}
+  .net{position:sticky;top:0;z-index:20;background:rgba(11,10,15,.88);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);
+    margin:0 -20px;padding:8px 20px;font-size:.8rem;color:var(--dim);text-align:center}
+  .net b{color:var(--mapped);font-family:var(--mono)} .net.warn b{color:#ff6b6b}
+  header{padding:52px 0 20px}
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+  .eyebrow a{color:var(--dim);text-decoration:none} .eyebrow a:hover{color:var(--gold)}
+  h1{font:700 clamp(2rem,5vw,2.9rem)/1.08 'Playfair Display',Georgia,serif;margin:12px 0 12px}
+  .lede{color:var(--dim);max-width:660px} .lede b{color:var(--ink)}
+  .drop{margin-top:22px;border:1.5px dashed var(--line);border-radius:12px;padding:22px;text-align:center;color:var(--dim);transition:.15s;cursor:pointer}
+  .drop.over{border-color:var(--gold);background:var(--panel)}
+  .drop b{color:var(--ink)}
+  textarea{width:100%;background:#0d0c12;border:1px solid var(--line);border-radius:11px;color:var(--ink);font-family:var(--mono);font-size:.84rem;padding:12px 14px;resize:vertical;min-height:120px;margin-top:12px}
+  .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px}
+  .btn{font:600 .92rem Inter,sans-serif;background:linear-gradient(96deg,var(--gold),var(--gold2));color:#161006;border:0;border-radius:10px;padding:11px 20px;cursor:pointer}
+  .btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line);font-weight:500}
+  .badge{font-family:var(--mono);font-size:.72rem;color:var(--dim)}
+  .out{margin-top:24px;display:none} .out.show{display:block}
+  .detect{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+  .detect .big{font:600 1.15rem 'Playfair Display',serif;color:var(--gold)}
+  .detect .sub{font-size:.86rem;color:var(--dim);margin-top:4px}
+  .detect .sub a{color:var(--gold);text-decoration:none}
+  table{width:100%;border-collapse:collapse;margin-top:6px;font-size:.86rem}
+  th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+  th{color:var(--dim);font-weight:500;font-size:.76rem;text-transform:uppercase;letter-spacing:.04em}
+  td.field{font-weight:600}
+  td .src{font-family:var(--mono);font-size:.82rem}
+  .tag{font-family:var(--mono);font-size:.66rem;padding:2px 7px;border-radius:5px}
+  .tag.MAPPED{background:var(--mapped-bg);color:var(--mapped)} .tag.FUZZY{background:var(--fuzzy-bg);color:var(--fuzzy)}
+  .tag.MISSING{background:#17151b;color:var(--missing)}
+  .extra{margin-top:12px;font-size:.84rem;color:var(--dim)} .extra .c{font-family:var(--mono);color:var(--extra)}
+  .plan{margin-top:16px;background:#0d0c12;border:1px solid var(--line);border-radius:12px;padding:16px 18px;font-family:var(--mono);font-size:.8rem;color:var(--dim);white-space:pre-wrap;word-break:break-all}
+  .plan .k{color:var(--gold)} .plan .v{color:var(--ink)} .plan .h{color:var(--extra)}
+  .door{margin-top:14px;background:var(--mapped-bg);border:1px solid #1d4634;border-radius:10px;padding:12px 16px;font-size:.86rem;color:var(--mapped)}
+  footer{margin-top:44px;border-top:1px solid var(--line);padding-top:22px;color:var(--dim);font-size:.85rem}
+  .cta{display:inline-block;margin:4px 8px 4px 0;padding:11px 18px;border-radius:10px;text-decoration:none}
+  .cta.solid{background:linear-gradient(96deg,var(--gold),var(--gold2));color:#161006;font-weight:600}
+  .cta.ghost{border:1px solid var(--line);color:var(--ink)}
+  .err{color:#ff6b6b;font-size:.88rem;margin-top:12px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="net" id="net">Runs in your browser · external requests: <b id="netCount">0</b> · your file never leaves this page</div>
+  <header>
+    <div class="eyebrow"><a href="./index.html">← fallkit</a> · map a real export · slice one</div>
+    <h1>Go deeper — map a real export.</h1>
+    <p class="lede">Drop in <b>one export</b> (CSV or JSON) from a tool your firm uses — a contacts dump, an invoice list, a transactions file. fallkit reads <b>only the shape</b>: the column names and how many records. It never keeps a single value, and it maps that shape onto the owned equivalent, then writes a <b>signed plan you can keep</b>. Nothing is uploaded, stored, or run — it's a plan, not an import.</p>
+    <div class="drop" id="drop">Drop a <b>.csv</b> or <b>.json</b> file here, or click to choose — <span class="badge">it's read locally with the File API; nothing is sent</span></div>
+    <input type="file" id="file" accept=".csv,.json,text/csv,application/json" style="display:none">
+    <details style="margin-top:12px"><summary class="badge" style="cursor:pointer">…or paste an export</summary>
+      <textarea id="paste" spellcheck="false">First Name,Last Name,Email Address,Company Name,Deal Stage,Phone,Owner
+Ada,Lovelace,ada@analytical.co,Analytical Engines,Qualified,020 7000 0000,Byron
+Grace,Hopper,grace@navy.mil,Navy Systems,Won,020 7000 0001,Aiken</textarea>
+      <div class="row"><button class="btn ghost" id="pasteBtn">Map the pasted export</button></div>
+    </details>
+  </header>
+
+  <div class="err" id="err"></div>
+
+  <div class="out" id="out">
+    <div class="detect" id="detect"></div>
+    <table id="tbl"><thead><tr><th>Owned field</th><th>Your column</th><th>Fit</th></tr></thead><tbody id="rows"></tbody></table>
+    <div class="extra" id="extra"></div>
+    <div class="plan" id="plan"></div>
+    <div class="row"><button class="btn" id="dl">Download this plan (JSON)</button><span class="badge">the plan is a hash of the SHAPE — never your data</span></div>
+    <div class="door" id="door"></div>
+  </div>
+
+  <footer>
+    <a class="cta solid" href="https://www.ai-nativesolutions.com">Talk to us about a build →</a>
+    <a class="cta ghost" href="./index.html">← Back to the stack map</a>
+    <p style="margin-top:16px">fallkit reads the shape of your export and maps it onto a real, live build — the field-matching and the plan hash are a mutation-gated kernel this page imports, and the file is read entirely in your browser. <span class="badge">source: <a href="https://github.com/sjgant80-hub/fallkit">github.com/sjgant80-hub/fallkit</a> · MIT</span></p>
+    <p class="badge">Powered by the Konomi architecture, created by Thomas Frumkin.</p>
+  </footer>
+</div>
+
+<script type="module">
+import { parseColumns, guessTarget, mapFields, buildManifest, TARGET_SCHEMAS } from './fieldmap.mjs?v=1';
+
+let external = 0;
+const bump = () => { external++; document.getElementById('netCount').textContent = external; document.getElementById('net').classList.add('warn'); };
+const _f = window.fetch; window.fetch = function(...a){ bump(); return _f.apply(this,a); };
+const _o = XMLHttpRequest.prototype.open; XMLHttpRequest.prototype.open = function(...a){ bump(); return _o.apply(this,a); };
+
+const esc = (s)=> String(s).replace(/[&<>]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;' }[c]));
+let currentPlan = null;
+
+function guessTool(cols, filename) {
+  // a soft label for the source tool, from filename or columns — cosmetic only
+  const f = (filename||'').toLowerCase();
+  if (f) return filename.replace(/\.(csv|json)$/i,'');
+  return 'your export';
+}
+
+function run(text, filename) {
+  const err = document.getElementById('err'); err.textContent = '';
+  const parsed = parseColumns(text);
+  if (!parsed.ok) { err.textContent = 'Could not read that: ' + parsed.why; document.getElementById('out').classList.remove('show'); return; }
+  const target = guessTarget(parsed.columns, filename);
+  if (!target) {
+    err.textContent = 'Read ' + parsed.columns.length + ' columns, but none of them line up with an owned organ yet — that’s an honest gap, and exactly what a custom build would add. Columns: ' + parsed.columns.join(', ');
+    document.getElementById('out').classList.remove('show'); return;
+  }
+  const m = mapFields(parsed.columns, target);
+  const sourceTool = guessTool(parsed.columns, filename);
+  const man = buildManifest({ sourceTool, targetId: target, columns: parsed.columns, recordCount: parsed.recordCount, createdAt: new Date().toISOString() });
+  if (!man.ok) { err.textContent = man.why; return; }
+  currentPlan = man.plan;
+
+  document.getElementById('detect').innerHTML =
+    `<div class="big">${parsed.format.toUpperCase()} · ${parsed.columns.length} columns · ${parsed.recordCount} records</div>
+     <div class="sub">maps onto <a href="https://sjgant80-hub.github.io/${m.repo}/" target="_blank" rel="noopener">${m.repo}</a> — ${TARGET_SCHEMAS[target].label} · ${m.coverage.mapped}/${m.coverage.total} fields covered</div>`;
+
+  document.getElementById('rows').innerHTML = m.fields.map(f =>
+    `<tr><td class="field">${esc(f.field)}</td><td><span class="src">${f.source ? esc(f.source) : '—'}</span></td><td><span class="tag ${f.status}">${f.status}</span></td></tr>`
+  ).join('');
+
+  document.getElementById('extra').innerHTML = m.extra.length
+    ? `<b>Extra columns you have that ${m.repo} doesn’t expect (kept, never dropped):</b> ${m.extra.map(c=>`<span class="c">${esc(c)}</span>`).join(' · ')}`
+    : `<span style="color:var(--mapped)">Every column in your export maps to a field.</span>`;
+
+  const p = currentPlan;
+  document.getElementById('plan').innerHTML =
+    `<span class="k">scaffold plan</span> <span class="v">${esc(p.kind)}</span>\n` +
+    `<span class="k">from</span> <span class="v">${esc(p.sourceTool)}</span>  <span class="k">→ build</span> <span class="v">${esc(p.targetRepo)}</span>\n` +
+    `<span class="k">records</span> <span class="v">${p.recordCount}</span>  <span class="k">coverage</span> <span class="v">${p.coverage.mapped}/${p.coverage.total}</span>\n` +
+    `<span class="k">data stored</span> <span class="v">${p.dataStored}</span>  <span class="k">auto-run</span> <span class="v">${p.autoRun}</span>\n` +
+    `<span class="k">plan hash</span> <span class="h">${p.manifestHash}</span>`;
+
+  document.getElementById('door').textContent =
+    `Read the shape of ${parsed.recordCount} records across ${parsed.columns.length} columns. Stored nothing, sent nothing, ran nothing — this is a plan for a human to approve. Moving the data, and building it, stay your decision.`;
+
+  document.getElementById('out').classList.add('show');
+}
+
+// file drop / choose
+const drop = document.getElementById('drop'), fileInput = document.getElementById('file');
+drop.addEventListener('click', ()=> fileInput.click());
+drop.addEventListener('dragover', (e)=>{ e.preventDefault(); drop.classList.add('over'); });
+drop.addEventListener('dragleave', ()=> drop.classList.remove('over'));
+drop.addEventListener('drop', (e)=>{ e.preventDefault(); drop.classList.remove('over'); const f=e.dataTransfer.files[0]; if(f) readFile(f); });
+fileInput.addEventListener('change', (e)=>{ const f=e.target.files[0]; if(f) readFile(f); });
+function readFile(f){ const r=new FileReader(); r.onload=()=> run(String(r.result), f.name); r.readAsText(f); }
+
+document.getElementById('pasteBtn').addEventListener('click', ()=> run(document.getElementById('paste').value, ''));
+
+document.getElementById('dl').addEventListener('click', ()=>{
+  if(!currentPlan) return;
+  const blob = new Blob([JSON.stringify(currentPlan, null, 2)], { type:'application/json' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'fallkit-scaffold-plan.json'; a.click(); URL.revokeObjectURL(a.href);
+});
+
+run(document.getElementById('paste').value, ''); // map the example on load
+</script>
+</body>
+</html>
