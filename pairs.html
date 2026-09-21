@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>fallkit — data → training pairs</title>
+<meta name="description" content="Paste a labelled export and fallkit turns it into the train + held-out eval pairs a specialist needs: it finds the label, builds pairs, splits them so nothing leaks, and hands you what fallforgemint needs to mint. If there's no label, it says so — it never invents one. Everything runs locally.">
+<meta property="og:title" content="fallkit — data → training pairs">
+<meta property="og:description" content="Your real data → train + held-out eval pairs, leakage-checked. What fallforgemint needs to mint a specialist. Local only.">
+<link rel="canonical" href="https://sjgant80-hub.github.io/fallkit/pairs.html">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0b0a0f;--panel:#141218;--panel2:#191620;--line:#2b251f;--ink:#e2d9c8;--dim:#8f8778;--gold:#d4a017;--gold2:#ffb648;--ok:#46c586;--ok-bg:#10261c;--warn:#e0a83a;--hold:#7aa2ff;--mono:'DM Mono',ui-monospace,Menlo,monospace}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,-apple-system,sans-serif;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:860px;margin:0 auto;padding:0 20px 80px}
+  a{color:var(--gold)} .mono{font-family:var(--mono)}
+  .net{position:sticky;top:0;z-index:20;background:rgba(11,10,15,.9);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);margin:0 -20px;padding:8px 20px;font-size:.8rem;color:var(--dim);text-align:center}
+  .net b{color:var(--ok);font-family:var(--mono)} .net.warn b{color:#ff6b6b}
+  header{padding:48px 0 14px}
+  .eyebrow{font-family:var(--mono);font-size:.74rem;letter-spacing:.16em;text-transform:uppercase;color:var(--gold)}
+  .eyebrow a{color:var(--dim);text-decoration:none} .eyebrow a:hover{color:var(--gold)}
+  h1{font:700 clamp(2rem,5vw,2.9rem)/1.08 'Playfair Display',Georgia,serif;margin:10px 0 10px}
+  .lede{color:var(--dim);max-width:680px} .lede b{color:var(--ink)}
+  textarea{width:100%;background:#0d0c12;border:1px solid var(--line);border-radius:11px;color:var(--ink);font-family:var(--mono);font-size:.78rem;padding:12px 14px;resize:vertical;min-height:130px;margin-top:18px}
+  .row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px}
+  .btn{font:600 .92rem Inter,sans-serif;background:linear-gradient(96deg,var(--gold),var(--gold2));color:#161006;border:0;border-radius:10px;padding:11px 20px;cursor:pointer}
+  .badge{font-family:var(--mono);font-size:.72rem;color:var(--dim)}
+  .out{margin-top:24px;display:none} .out.show{display:block}
+  .detect{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px;margin-bottom:14px}
+  .detect .big{font:600 1.1rem 'Playfair Display',serif;color:var(--gold)}
+  .detect .sub{font-size:.85rem;color:var(--dim);margin-top:5px}
+  .chk{display:inline-block;font-family:var(--mono);font-size:.74rem;padding:3px 10px;border-radius:6px;background:var(--ok-bg);color:var(--ok);margin-top:8px}
+  .chk.bad{background:#2a1416;color:#ff6b6b}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:6px} @media(max-width:600px){.cols{grid-template-columns:1fr}}
+  .col h3{font:600 .82rem 'Playfair Display',serif;margin:0 0 6px;color:var(--gold)}
+  .col.hold h3{color:var(--hold)}
+  .pair{background:#0d0c12;border:1px solid var(--line);border-left:3px solid var(--ok);border-radius:9px;padding:9px 12px;margin-bottom:7px;font-family:var(--mono);font-size:.74rem}
+  .col.hold .pair{border-left-color:var(--hold)}
+  .pair .in{color:var(--dim);word-break:break-word} .pair .arr{color:var(--gold)} .pair .out{color:var(--ink);font-weight:600}
+  .warns{margin-top:12px} .warns .w{font-size:.84rem;color:var(--warn);margin:3px 0} .warns .w::before{content:"⚠ ";color:var(--dim)}
+  .handoff{margin-top:16px;background:linear-gradient(120deg,rgba(212,160,23,.08),transparent);border:1px solid var(--line);border-radius:10px;padding:13px 16px;font-size:.9rem;color:var(--dim)}
+  .handoff b{color:var(--gold)}
+  .unlabeled{margin-top:16px;background:#17151b;border:1px solid var(--line);border-radius:10px;padding:14px 16px;color:var(--dim);font-size:.92rem}
+  footer{margin-top:40px;border-top:1px solid var(--line);padding-top:22px;color:var(--dim);font-size:.85rem}
+  .cta{display:inline-block;margin:4px 8px 4px 0;padding:11px 18px;border-radius:10px;text-decoration:none}
+  .cta.solid{background:linear-gradient(96deg,var(--gold),var(--gold2));color:#161006;font-weight:600}
+  .cta.ghost{border:1px solid var(--line);color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="net" id="net">Runs in your browser · external requests: <b id="netCount">0</b> · your data never leaves this page</div>
+  <header>
+    <div class="eyebrow"><a href="./index.html">← fallkit</a> · data → training pairs · the ingestion depth</div>
+    <h1>From your data to a specialist's training set.</h1>
+    <p class="lede">Paste a <b>labelled</b> export — support tickets with a category, deals with an outcome. fallkit finds the label, turns each row into an <b>input → output</b> pair, and splits them into <b>train</b> and a <b>held-out eval</b> so nothing leaks — because a gate verdict means nothing if the model was tested on what it trained on. If there's <b>no label</b>, it says so and stops. It never invents one. Everything runs locally; the pairs stay on your machine, ready for fallforgemint.</p>
+    <textarea id="data" spellcheck="false">ticket_id,subject,body,category
+T-1001,Cannot log in,password reset link is broken,Access
+T-1002,Refund please,I was charged twice this month,Billing
+T-1003,App crashes,white screen after the latest update,Bug
+T-1004,Wrong invoice,the total does not match my plan,Billing
+T-1005,Locked out,2FA code never arrives,Access
+T-1006,Feature request,please add dark mode,Product
+T-1007,Double charge,billed on two cards,Billing
+T-1008,Error 500,dashboard fails to load,Bug
+T-1009,Cannot sign in,SSO redirect loops,Access
+T-1010,Cancel plan,how do I downgrade,Billing</textarea>
+    <div class="row"><button class="btn" id="genBtn">Generate training pairs →</button><span class="badge">names + values read locally · nothing uploaded</span></div>
+  </header>
+
+  <div class="out" id="out"></div>
+
+  <footer>
+    <a class="cta solid" href="./architect.html">← Back to the auto-architect</a>
+    <a class="cta ghost" href="https://www.ai-nativesolutions.com">Talk to us about a build →</a>
+    <p style="margin-top:16px">Label detection, pair building, and the leakage-free split are a mutation-gated kernel this page imports; your file is read entirely in your browser. These pairs are what fallforgemint needs to mint an owned specialist — starting at the smallest tier that provably beats the base. <span class="badge">source: <a href="https://github.com/sjgant80-hub/fallkit">github.com/sjgant80-hub/fallkit</a> · MIT</span></p>
+    <p class="badge">Powered by the Konomi architecture, created by Thomas Frumkin.</p>
+  </footer>
+</div>
+
+<script type="module">
+import { generatePairs } from './pairs.mjs?v=1';
+
+let external = 0;
+const bump = () => { external++; document.getElementById('netCount').textContent = external; document.getElementById('net').classList.add('warn'); };
+const _f = window.fetch; window.fetch = function(...a){ bump(); return _f.apply(this,a); };
+
+const esc = (s)=> String(s).replace(/[&<>]/g, c=>({ '&':'&amp;','<':'&lt;','>':'&gt;' }[c]));
+const pairHtml = (p)=> `<div class="pair"><span class="in">${esc(p.input)}</span> <span class="arr">→</span> <span class="out">${esc(p.output)}</span></div>`;
+
+function run(){
+  const g = generatePairs(document.getElementById('data').value, { holdoutPct: 25 });
+  const out = document.getElementById('out'); out.classList.add('show');
+  if(!g.ok){ out.innerHTML = `<div class="unlabeled">Couldn't read that: ${esc(g.why)}</div>`; return; }
+  if(!g.labeled){
+    out.innerHTML = `<div class="unlabeled"><b style="color:var(--warn)">Unlabeled.</b> ${esc(g.why)}<br><br>Columns found: <span class="mono">${g.columns.map(esc).join(', ')}</span>. To mint a specialist from this, one column needs to be the thing you'd want predicted (a category, an outcome, a status). That's a labelling job — an honest opening, not a failure.</div>`;
+    return;
+  }
+  out.innerHTML =
+    `<div class="detect"><div class="big">target: “${esc(g.target)}” · ${g.inputs.length} input columns · ${g.totalPairs} labelled pairs</div>
+       <div class="sub">inputs: <span class="mono">${g.inputs.map(esc).join(', ')}</span></div>
+       <div class="chk${g.leakage?' bad':''}">${g.leakage?'✗ LEAKAGE':'✓ no leakage — held-out inputs never appear in train'}</div>
+       <span class="chk" style="margin-left:8px;background:#111a2e;color:var(--hold)">${g.trainCount} train · ${g.holdoutCount} held-out</span></div>
+     <div class="cols">
+       <div class="col"><h3>Train (sample)</h3>${g.sampleTrain.map(pairHtml).join('')||'<span class="badge">—</span>'}</div>
+       <div class="col hold"><h3>Held-out eval (sample)</h3>${g.sampleHoldout.map(pairHtml).join('')||'<span class="badge">— (too few rows to hold any back)</span>'}</div>
+     </div>
+     ${g.warnings.length?`<div class="warns">${g.warnings.map(w=>`<div class="w">${esc(w)}</div>`).join('')}</div>`:''}
+     <div class="handoff"><b>${g.trainCount} train + ${g.holdoutCount} held-out pairs</b> — this is exactly what fallforgemint needs to mint a “${esc(g.target)}” specialist, starting at 1b and escalating only if the gate says it lost on that held-out set. Nothing was uploaded; the pairs stay on your machine.</div>`;
+}
+document.getElementById('genBtn').addEventListener('click', run);
+run();
+</script>
+</body>
+</html>
