@@ -58,7 +58,7 @@ export const ARMOURY = [
   { id: 'fallclaimpractice', repo: 'fallclaimpractice', seat: 'Money',       tier: 'prototype', does: 'Firm-side accounting / client escrow for claims firms.' },
   { id: 'fallap',            repo: 'fallap',            seat: 'Money',       tier: 'prototype', does: 'Accounts payable.' },
   { id: 'fallcrm-elite',     repo: 'fallcrm-elite',     seat: 'Sales & CRM', tier: 'prototype', does: 'Sovereign CRM — signal timelines, agentic follow-up.' },
-  { id: 'witness',           repo: 'witness',           seat: 'Overseer',    tier: 'prototype', does: 'The build gate itself — mutation-tests code before it ships.' },
+  { id: 'witness',           repo: 'witness',           seat: 'Overseer',    tier: 'proven',    does: 'The build gate itself — mutation-tests code before it ships. Self-gates clean on CI (witness.mjs + runner.mjs).' },
 ];
 
 export function organById(id) {
